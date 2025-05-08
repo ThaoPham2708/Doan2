@@ -1,3 +1,4 @@
+
 # Learning Weakness Detection System
 
   ## Mô tả dự án
@@ -124,9 +125,6 @@
 
   ---
 
-  ## Liên hệ
-  - Tác giả: [Tên bạn]
-  - Email: [Email của bạn]
 
 ## Danh sách đầy đủ các API endpoint
 
@@ -207,3 +205,4 @@
 ### 7. Feedback Generator
 - **Trả về phản hồi cá nhân hóa dựa trên kết quả trả lời gần nhất:**  
   `POST http://localhost:3000/api/students/{studentId}/feedback` 
+=======

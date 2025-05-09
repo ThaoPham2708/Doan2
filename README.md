@@ -1,4 +1,3 @@
-
 # Learning Weakness Detection System
 
   ## Mô tả dự án
@@ -205,4 +204,40 @@
 ### 7. Feedback Generator
 - **Trả về phản hồi cá nhân hóa dựa trên kết quả trả lời gần nhất:**  
   `POST http://localhost:3000/api/students/{studentId}/feedback` 
-=======
+
+## Adaptive Feedback API
+
+### POST `/api/students/:studentId/adaptive-feedback`
+
+**Chức năng:**
+- Mô hình hóa năng lực nền (aptitude) của học viên dựa trên lịch sử làm bài.
+- Tính toán tỷ lệ thành thạo các kỹ năng tiền đề (pre(KC)) cho từng KC.
+- Tính điểm tổng hợp mu_KC cho từng KC: `mu_KC = w1 * aptitude + w2 * pre(KC)`.
+- Xác định KC yếu nhất (mu_KC thấp nhất).
+- Sinh phản hồi cá nhân hóa:
+  - Nếu yếu: gợi ý ôn tập lại các KC tiền đề.
+  - Nếu mạnh: khuyến khích tăng độ khó.
+  - Trung bình: động viên tiếp tục luyện tập.
+
+**Request:**
+```
+POST /api/students/123/adaptive-feedback
+```
+
+**Response ví dụ:**
+```json
+{
+  "aptitude": 0.3,
+  "muKC": { "5": 0.25, "10": 0.5, ... },
+  "preKC": { "5": 0.2, "10": 1, ... },
+  "weakest_kc": 5,
+  "weakest_mu": 0.25,
+  "feedback": "Bạn nên ôn tập lại các KC tiền đề (3, 4) trước khi quay lại KC 5"
+}
+```
+
+**Ý nghĩa:**
+- Giúp phát hiện điểm yếu cá nhân hóa và sinh phản hồi thích ứng cho từng học viên.
+- Có thể dùng để xây dựng dashboard, gợi ý lộ trình học tập, hoặc cá nhân hóa nội dung luyện tập.
+
+---

@@ -370,4 +370,92 @@ router.get('/kcs/grade/:grade', async (req, res) => {
     }
 });
 
+// API mô hình hóa năng lực học viên và phản hồi thích ứng
+router.post('/students/:studentId/adaptive-feedback', async (req, res) => {
+    const studentId = req.params.studentId;
+    // Lấy lịch sử làm bài
+    const transactions = await Transaction.find({ user_id: studentId });
+    const questionIds = [...new Set(transactions.map(t => t.question_id))];
+    const questions = await Question.find({ id: { $in: questionIds } });
+    const questionKcMap = {};
+    questions.forEach(q => { questionKcMap[q.id] = q.kcs || []; });
+    const kcStats = {};
+    transactions.forEach(t => {
+        const kcs = questionKcMap[t.question_id] || [];
+        kcs.forEach(kc => {
+            if (!kcStats[kc]) kcStats[kc] = { total: 0, correct: 0 };
+            kcStats[kc].total++;
+            if (t.correct) kcStats[kc].correct++;
+        });
+    });
+    // Lấy danh sách tất cả KC
+    const allKCs = await KnowledgeComponent.find();
+    // Giả lập dependencies
+    const dependencies = [
+        { kc_id: 20, prerequisite: 10 },
+        { kc_id: 30, prerequisite: 20 },
+        { kc_id: 5, prerequisite: 3 },
+        { kc_id: 5, prerequisite: 4 }
+    ];
+    const kcPrereqMap = {};
+    dependencies.forEach(dep => {
+        if (!kcPrereqMap[dep.kc_id]) kcPrereqMap[dep.kc_id] = [];
+        kcPrereqMap[dep.kc_id].push(dep.prerequisite);
+    });
+    // Tính aptitude tổng thể
+    const total = transactions.length;
+    const correct = transactions.filter(t => t.correct).length;
+    const aptitude = total > 0 ? Math.max(0.1, Math.min(1, correct / total)) : 0.5;
+    // Tính pre(KC) và mu_KC cho từng KC
+    const w1 = 0.7, w2 = 0.3;
+    const muKC = {};
+    const preKC = {};
+    allKCs.forEach(kc => {
+        // pre(KC): trung bình tỷ lệ đúng của các KC tiền đề
+        let pre = 1;
+        if (kcPrereqMap[kc.id]) {
+            let sum = 0, count = 0;
+            kcPrereqMap[kc.id].forEach(prereq => {
+                const stat = kcStats[prereq] || { total: 0, correct: 0 };
+                sum += stat.total > 0 ? stat.correct / stat.total : 0.5;
+                count++;
+            });
+            pre = count > 0 ? sum / count : 1;
+        }
+        preKC[kc.id] = pre;
+        muKC[kc.id] = w1 * aptitude + w2 * pre;
+    });
+    // Xác định KC yếu nhất
+    let minMu = 1, minKc = null;
+    allKCs.forEach(kc => {
+        if (muKC[kc.id] < minMu) {
+            minMu = muKC[kc.id];
+            minKc = kc.id;
+        }
+    });
+    // Sinh phản hồi cá nhân hóa
+    let feedback = '';
+    if (minMu < 0.5) {
+        // Nếu KC yếu có tiền đề, gợi ý ôn tập lại các KC tiền đề
+        const prereqs = kcPrereqMap[minKc] || [];
+        if (prereqs.length > 0) {
+            feedback = `Bạn nên ôn tập lại các KC tiền đề (${prereqs.join(', ')}) trước khi quay lại KC ${minKc}`;
+        } else {
+            feedback = `Bạn nên luyện tập thêm về KC ${minKc}`;
+        }
+    } else if (aptitude > 0.7) {
+        feedback = 'Bạn đang học rất tốt! Hãy thử sức với các câu hỏi khó hơn để vượt ngưỡng.';
+    } else {
+        feedback = 'Tiếp tục luyện tập để nâng cao năng lực.';
+    }
+    res.json({
+        aptitude,
+        muKC,
+        preKC,
+        weakest_kc: minKc,
+        weakest_mu: minMu,
+        feedback
+    });
+});
+
 module.exports = router; 

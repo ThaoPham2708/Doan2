@@ -1,0 +1,497 @@
+{
+	"info": {
+		"_postman_id": "201bb1d4-bdaf-4e2e-ad58-8c57243cf604",
+		"name": "Learning Weakness Detection System",
+		"description": "Postman Collection for the Learning Weakness Detection System Backend API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "35985844"
+	},
+	"item": [
+		{
+			"name": "Knowledge Components (KC)",
+			"item": [
+				{
+					"name": "Get All KCs",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:3000/api/kcs"
+					},
+					"response": []
+				},
+				{
+					"name": "Get KC by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/kcs/:kcId",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"kcs",
+								":kcId"
+							],
+							"variable": [
+								{
+									"key": "kcId",
+									"value": "1001"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Questions by KC ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/kcs/:kcId/questions",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"kcs",
+								":kcId",
+								"questions"
+							],
+							"variable": [
+								{
+									"key": "kcId",
+									"value": "1001"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get KCs by Grade",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/kcs/grade/:grade",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"kcs",
+								"grade",
+								":grade"
+							],
+							"variable": [
+								{
+									"key": "grade",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create New KC",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"id\": 1001, \"name\": \"Cộng trừ trong phạm vi 10\", \"description\": \"Kiến thức toán lớp 2\", \"grade\": 2}"
+						},
+						"url": "http://localhost:3000/api/kcs"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Questions",
+			"item": [
+				{
+					"name": "Get All Questions",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:3000/api/questions"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Question by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/questions/:questionId",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"questions",
+								":questionId"
+							],
+							"variable": [
+								{
+									"key": "questionId",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Transactions",
+			"item": [
+				{
+					"name": "Record Student Transaction",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"user_id\": \"student123\", \"question_id\": 1, \"correct\": true, \"time_taken\": 30}"
+						},
+						"url": "http://localhost:3000/api/transactions"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Transactions",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:3000/api/transactions"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Transactions by Student ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/students/:studentId/transactions",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"students",
+								":studentId",
+								"transactions"
+							],
+							"variable": [
+								{
+									"key": "studentId",
+									"value": "student123"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Student Performance & Weakness",
+			"item": [
+				{
+					"name": "Get Student Performance",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/students/:studentId/performance",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"students",
+								":studentId",
+								"performance"
+							],
+							"variable": [
+								{
+									"key": "studentId",
+									"value": "student123"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Student Weaknesses",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/students/:studentId/weaknesses",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"students",
+								":studentId",
+								"weaknesses"
+							],
+							"variable": [
+								{
+									"key": "studentId",
+									"value": "student123"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Domain Model",
+			"item": [
+				{
+					"name": "Get KC Dependencies",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:3000/api/domain/kc-dependencies"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Question Recommendation (Bandit Model)",
+			"item": [
+				{
+					"name": "Get Next Question (Random)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"algorithm\": \"random\"}"
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/students/:studentId/next-question",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"students",
+								":studentId",
+								"next-question"
+							],
+							"variable": [
+								{
+									"key": "studentId",
+									"value": "student123"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Next Question (Thompson)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"algorithm\": \"thompson\"}"
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/students/:studentId/next-question",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"students",
+								":studentId",
+								"next-question"
+							],
+							"variable": [
+								{
+									"key": "studentId",
+									"value": "student123"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Next Question (HDoC)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"algorithm\": \"hdoc\"}"
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/students/:studentId/next-question",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"students",
+								":studentId",
+								"next-question"
+							],
+							"variable": [
+								{
+									"key": "studentId",
+									"value": "student123"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Feedback Generator",
+			"item": [
+				{
+					"name": "Generate Personalized Feedback",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/students/:studentId/feedback",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"students",
+								":studentId",
+								"feedback"
+							],
+							"variable": [
+								{
+									"key": "studentId",
+									"value": "student123"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Adaptive Feedback API",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/students/:studentId/adaptive-feedback",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"students",
+								":studentId",
+								"adaptive-feedback"
+							],
+							"variable": [
+								{
+									"key": "studentId",
+									"value": "student123"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

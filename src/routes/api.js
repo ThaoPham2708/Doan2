@@ -206,11 +206,11 @@ router.post('/students/:studentId/next-question', async (req, res) => {
             if (t.correct) kcStats[kc].correct++;
         });
     });
-    const weakKCs = Object.entries(kcStats).filter(([kc, stat]) => stat.total > 0 && stat.correct / stat.total < 0.6).map(([kc, stat]) => parseInt(kc));
-    // Lấy danh sách câu hỏi chưa làm thuộc KC yếu
+    // Lấy danh sách tất cả KC
+    const allKCs = await KnowledgeComponent.find();
+    // Lấy danh sách câu hỏi chưa làm
     const candidateQuestions = await Question.find({
-        id: { $nin: Array.from(doneQuestionIds) },
-        kcs: { $in: weakKCs }
+        id: { $nin: Array.from(doneQuestionIds) }
     });
     let selected = null;
     if (algorithm === 'random') {
@@ -234,24 +234,64 @@ router.post('/students/:studentId/next-question', async (req, res) => {
             selected = kcQuestions[Math.floor(Math.random() * kcQuestions.length)];
         }
     } else if (algorithm === 'hdoc') {
-        // HDoC: Ưu tiên câu hỏi có độ khó gần với năng lực học sinh
-        // Giả lập năng lực học sinh là tỷ lệ đúng trung bình
+        // --- HDoC nâng cấp ---
+        const w1 = 0.7, w2 = 0.3, delta = 0.05;
         const total = transactions.length;
         const correct = transactions.filter(t => t.correct).length;
-        const ability = total > 0 ? correct / total : 0.5;
-        // Chọn câu hỏi có độ khó gần với ability nhất
-        let minDiff = 1;
-        candidateQuestions.forEach(q => {
-            const diff = Math.abs((q.difficulty || 0.5) - ability);
-            if (!selected || diff < minDiff) {
-                minDiff = diff;
-                selected = q;
-            }
+        const aptitude = total > 0 ? correct / total : 0.5;
+        const dependencies = [
+            { kc_id: 20, prerequisite: 10 },
+            { kc_id: 30, prerequisite: 20 }
+        ];
+        const kcPrereqMap = {};
+        dependencies.forEach(dep => {
+            if (!kcPrereqMap[dep.kc_id]) kcPrereqMap[dep.kc_id] = [];
+            kcPrereqMap[dep.kc_id].push(dep.prerequisite);
         });
+        const muKC = {};
+        allKCs.forEach(kc => {
+            let preKC = 1;
+            if (kcPrereqMap[kc.id]) {
+                let sum = 0, count = 0;
+                kcPrereqMap[kc.id].forEach(prereq => {
+                    const stat = kcStats[prereq] || { total: 0, correct: 0 };
+                    sum += stat.total > 0 ? stat.correct / stat.total : 0.5;
+                    count++;
+                });
+                preKC = count > 0 ? sum / count : 1;
+            }
+            muKC[kc.id] = w1 * aptitude + w2 * preKC;
+        });
+        let minMu = 1, minKc = null;
+        for (const kc of allKCs) {
+            const stat = kcStats[kc.id] || { total: 0, correct: 0 };
+            const N = stat.total;
+            const K = allKCs.length;
+            if (N > 0) {
+                const muHat = stat.correct / N;
+                const cb = Math.sqrt(Math.log(4 * K * N * N / delta) / (2 * N * N));
+                const muConf = muHat + cb;
+                if (muConf < 0.3 && N >= 5) {
+                    return res.json({
+                        message: 'Học viên có dấu hiệu yếu rõ rệt ở KC ' + kc.id + ', dừng sớm để phản hồi.',
+                        weak_kc: kc.id,
+                        mu_conf: muConf
+                    });
+                }
+            }
+            if (muKC[kc.id] < minMu) {
+                minMu = muKC[kc.id];
+                minKc = kc.id;
+            }
+        }
+        const kcQuestions = candidateQuestions.filter(q => q.kcs.includes(minKc));
+        if (kcQuestions.length > 0) {
+            selected = kcQuestions[Math.floor(Math.random() * kcQuestions.length)];
+        }
     }
     if (selected) {
         res.json({ question: selected });
-    } else {
+    } else if (!res.headersSent) {
         res.status(404).json({ message: 'Không tìm thấy câu hỏi phù hợp.' });
     }
 });

@@ -3,6 +3,7 @@ const router = express.Router();
 const Question = require('../models/Question');
 const KnowledgeComponent = require('../models/KnowledgeComponent');
 const Transaction = require('../models/Transaction');
+const experimentController = require('../controllers/experimentController');
 
 // Get all knowledge components
 router.get('/kcs', async (req, res) => {
@@ -328,7 +329,7 @@ router.post('/students/:studentId/feedback', async (req, res) => {
 // Get all transactions
 router.get('/transactions', async (req, res) => {
     try {
-        const transactions = await Transaction.find();
+        const transactions = await Transaction.find().limit(255);
         res.json(transactions);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -369,6 +370,40 @@ router.get('/kcs/grade/:grade', async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 });
+
+// Feedback templates for different performance levels
+const feedbackTemplates = {
+    weak: [
+        "Bạn cần ôn tập lại các kiến thức cơ bản trước khi tiếp tục. Hãy thử làm lại các bài tập về KC {prereqs}.",
+        "Để hiểu rõ hơn về KC {kc}, bạn nên xem lại các kiến thức tiền đề ở KC {prereqs}.",
+        "KC {kc} đang là điểm yếu của bạn. Hãy dành thời gian ôn tập lại KC {prereqs} trước.",
+        "Bạn đang gặp khó khăn với KC {kc}. Đừng lo lắng, hãy quay lại ôn tập KC {prereqs} để xây dựng nền tảng vững chắc.",
+        "Để cải thiện KC {kc}, bạn cần nắm vững các kiến thức ở KC {prereqs}.",
+        "Hãy dành thời gian ôn tập lại KC {prereqs} trước khi tiếp tục với KC {kc}.",
+        "Bạn đang cần củng cố kiến thức cơ bản. Hãy tập trung vào KC {prereqs} trước.",
+        "Để tiến bộ, bạn nên quay lại xem xét kỹ các kiến thức ở KC {prereqs}."
+    ],
+    medium: [
+        "Bạn đang tiến bộ tốt! Hãy tiếp tục luyện tập để nâng cao kỹ năng.",
+        "Bạn đã nắm được kiến thức cơ bản. Hãy thử thách bản thân với các bài tập khó hơn.",
+        "Tiếp tục duy trì tốc độ học tập này, bạn sẽ sớm đạt được mục tiêu.",
+        "Bạn đang đi đúng hướng. Hãy dành thêm thời gian luyện tập để nâng cao kỹ năng.",
+        "Kiến thức của bạn đang ở mức trung bình. Hãy cố gắng thêm một chút nữa!",
+        "Bạn đã có nền tảng tốt. Hãy thử sức với các bài tập nâng cao.",
+        "Đừng dừng lại ở đây, hãy tiếp tục phát triển kỹ năng của bạn.",
+        "Bạn đang tiến bộ đều đặn. Hãy duy trì động lực học tập!"
+    ],
+    strong: [
+        "Xuất sắc! Bạn đã nắm vững kiến thức. Hãy thử sức với các bài tập nâng cao.",
+        "Bạn đang học rất tốt! Hãy thử thách bản thân với các bài tập khó hơn.",
+        "Tuyệt vời! Bạn đã sẵn sàng cho các thử thách mới.",
+        "Bạn đang thể hiện sự tiến bộ vượt bậc. Hãy tiếp tục phát huy!",
+        "Kiến thức của bạn đã rất vững vàng. Hãy thử sức với các bài tập nâng cao.",
+        "Bạn đang đi đúng hướng! Hãy tiếp tục phát triển kỹ năng của mình.",
+        "Xuất sắc! Bạn đã sẵn sàng cho các thử thách mới.",
+        "Bạn đang học rất hiệu quả. Hãy tiếp tục duy trì phong độ này!"
+    ]
+};
 
 // API mô hình hóa năng lực học viên và phản hồi thích ứng
 router.post('/students/:studentId/adaptive-feedback', async (req, res) => {
@@ -433,21 +468,23 @@ router.post('/students/:studentId/adaptive-feedback', async (req, res) => {
             minKc = kc.id;
         }
     });
-    // Sinh phản hồi cá nhân hóa
-    let feedback = '';
-    if (minMu < 0.5) {
-        // Nếu KC yếu có tiền đề, gợi ý ôn tập lại các KC tiền đề
+
+    // Chọn template phản hồi dựa trên mức độ thành thạo
+    let feedbackTemplate;
+    if (minMu < 0.4) {
+        feedbackTemplate = feedbackTemplates.weak[Math.floor(Math.random() * feedbackTemplates.weak.length)];
         const prereqs = kcPrereqMap[minKc] || [];
-        if (prereqs.length > 0) {
-            feedback = `Bạn nên ôn tập lại các KC tiền đề (${prereqs.join(', ')}) trước khi quay lại KC ${minKc}`;
-        } else {
-            feedback = `Bạn nên luyện tập thêm về KC ${minKc}`;
-        }
-    } else if (aptitude > 0.7) {
-        feedback = 'Bạn đang học rất tốt! Hãy thử sức với các câu hỏi khó hơn để vượt ngưỡng.';
+        feedback = feedbackTemplate
+            .replace('{kc}', minKc)
+            .replace('{prereqs}', prereqs.join(', '));
+    } else if (minMu < 0.7) {
+        feedbackTemplate = feedbackTemplates.medium[Math.floor(Math.random() * feedbackTemplates.medium.length)];
+        feedback = feedbackTemplate;
     } else {
-        feedback = 'Tiếp tục luyện tập để nâng cao năng lực.';
+        feedbackTemplate = feedbackTemplates.strong[Math.floor(Math.random() * feedbackTemplates.strong.length)];
+        feedback = feedbackTemplate;
     }
+
     res.json({
         aptitude,
         muKC,
@@ -457,5 +494,11 @@ router.post('/students/:studentId/adaptive-feedback', async (req, res) => {
         feedback
     });
 });
+
+// Thêm các routes cho thí nghiệm
+router.get('/experiments/kc-count/:studentId', experimentController.experimentKCCount);
+router.get('/experiments/mastery-threshold/:studentId', experimentController.experimentMasteryThreshold);
+router.get('/experiments/aptitude/:studentId', experimentController.experimentAptitude);
+router.get('/experiments/error-rate/:studentId', experimentController.experimentErrorRate);
 
 module.exports = router; 

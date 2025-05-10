@@ -492,6 +492,123 @@
 					"response": []
 				}
 			]
+		},
+		{
+			"name": "Experiments",
+			"item": [
+				{
+					"name": "KC Count Experiment",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/experiments/kc-count/:studentId",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"experiments",
+								"kc-count",
+								":studentId"
+							],
+							"variable": [
+								{
+									"key": "studentId",
+									"value": "student123"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Mastery Threshold Experiment",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/experiments/mastery-threshold/:studentId",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"experiments",
+								"mastery-threshold",
+								":studentId"
+							],
+							"variable": [
+								{
+									"key": "studentId",
+									"value": "student123"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Aptitude Experiment",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/experiments/aptitude/:studentId",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"experiments",
+								"aptitude",
+								":studentId"
+							],
+							"variable": [
+								{
+									"key": "studentId",
+									"value": "student123"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Error Rate Experiment",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/experiments/error-rate/:studentId",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"experiments",
+								"error-rate",
+								":studentId"
+							],
+							"variable": [
+								{
+									"key": "studentId",
+									"value": "student123"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
 		}
 	]
 }

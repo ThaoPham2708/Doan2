@@ -240,4 +240,107 @@ POST /api/students/123/adaptive-feedback
 - Giúp phát hiện điểm yếu cá nhân hóa và sinh phản hồi thích ứng cho từng học viên.
 - Có thể dùng để xây dựng dashboard, gợi ý lộ trình học tập, hoặc cá nhân hóa nội dung luyện tập.
 
+## Experiment APIs
+
+### 1. KC Count Experiment
+- **Thử nghiệm với số lượng KC khác nhau:**  
+  `GET http://localhost:3000/api/experiments/kc-count/:studentId`
+  
+  **Chức năng:**
+  - Thử nghiệm với số KC từ 2 đến 16
+  - Phân tích ảnh hưởng của số lượng KC lên độ chính xác
+  - Đánh giá số lượng câu hỏi cần thiết cho mỗi số lượng KC
+
+  **Response ví dụ:**
+  ```json
+  [
+    {
+      "kcCount": 2,
+      "accuracy": 0.75,
+      "questionCount": 50
+    },
+    {
+      "kcCount": 4,
+      "accuracy": 0.68,
+      "questionCount": 85
+    }
+    // ...
+  ]
+  ```
+
+### 2. Mastery Threshold Experiment
+- **Thử nghiệm với ngưỡng làm chủ khác nhau:**  
+  `GET http://localhost:3000/api/experiments/mastery-threshold/:studentId`
+  
+  **Chức năng:**
+  - Thử nghiệm với ngưỡng từ 0.2 đến 0.9
+  - Phân tích số lượng KC yếu ở mỗi ngưỡng
+  - Tính toán số câu hỏi trung bình cần thiết
+
+  **Response ví dụ:**
+  ```json
+  [
+    {
+      "threshold": 0.2,
+      "weakKCCount": 3,
+      "averageQuestionsPerKC": 25
+    },
+    {
+      "threshold": 0.3,
+      "weakKCCount": 5,
+      "averageQuestionsPerKC": 30
+    }
+    // ...
+  ]
+  ```
+
+### 3. Aptitude Experiment
+- **Thử nghiệm với năng lực học sinh khác nhau:**  
+  `GET http://localhost:3000/api/experiments/aptitude/:studentId`
+  
+  **Chức năng:**
+  - Phân tích năng lực học sinh (thấp, trung bình, cao)
+  - Đánh giá độ chính xác theo từng mức năng lực
+  - Tính toán tổng số câu hỏi đã làm
+
+  **Response ví dụ:**
+  ```json
+  {
+    "aptitude": 0.65,
+    "level": "medium",
+    "accuracyByLevel": {
+      "level": "medium",
+      "accuracy": 0.68,
+      "kcCount": 8
+    },
+    "totalQuestions": 120
+  }
+  ```
+
+### 4. Error Rate Experiment
+- **Thử nghiệm với tỷ lệ sai số khác nhau:**  
+  `GET http://localhost:3000/api/experiments/error-rate/:studentId`
+  
+  **Chức năng:**
+  - Thử nghiệm với tỷ lệ sai số từ 0.05 đến 0.35
+  - Mô phỏng ảnh hưởng của sai số lên độ chính xác
+  - Phân tích số lượng câu hỏi cần thiết
+
+  **Response ví dụ:**
+  ```json
+  [
+    {
+      "errorRate": 0.05,
+      "accuracy": 0.85,
+      "questionCount": 100
+    },
+    {
+      "errorRate": 0.1,
+      "accuracy": 0.78,
+      "questionCount": 120
+    }
+    // ...
+  ]
+  ```
+
 ---
